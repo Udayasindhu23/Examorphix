@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ timetable.name }} - Exam Timetable</title>
+    <style>
+        @page {
+            size: a4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Helvetica, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-bottom: 2px solid #000;
+        }
+        .header h1 {
+            margin: 0;
+            color: #000;
+            font-size: 24px;
+        }
+        .header p {
+            margin: 5px 0;
+            color: #666;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .date-header {
+            background-color: #e0e0e0;
+            font-weight: bold;
+        }
+        .notes {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Exam Timetable</h1>
+        <p>{{ timetable.name }}</p>
+        <p>Period: {{ timetable.start_date|date:"F d, Y" }} - {{ timetable.end_date|date:"F d, Y" }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Subject</th>
+                <th>Venue</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for date, exams in exams_by_date.items %}
+                {% for exam in exams %}
+                    <tr>
+                        {% if forloop.first %}
+                            <td class="date-header" rowspan="{{ exams|length }}">
+                                {{ exam.date|date:"l, F d, Y" }}
+                            </td>
+                        {% endif %}
+                        <td>{{ exam.start_time|time:"g:i A" }} - {{ exam.end_time|time:"g:i A" }}</td>
+                        <td>
+                            {{ exam.course.code }}<br>
+                            <small>{{ exam.course.name }}</small><br>
+                            <small>{{ exam.course.department.name }} - Year {{ exam.course.year }}</small>
+                        </td>
+                        <td>
+                            {{ exam.hall.name }}<br>
+                            <small>Capacity: {{ exam.hall.capacity }}</small>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="notes">
+        <h3>Important Notes:</h3>
+        <ul>
+            <li>Students must arrive 30 minutes before the exam time.</li>
+            <li>Bring your student ID card and exam hall ticket.</li>
+            <li>No electronic devices allowed in the exam hall.</li>
+            <li>Follow all exam rules and regulations.</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p>Generated on: {{ current_date|date:"F d, Y" }}</p>
+        <p>This is a computer-generated document. No signature required.</p>
+    </div>
+</body>
+</html> 

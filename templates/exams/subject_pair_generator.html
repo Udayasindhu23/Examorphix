@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <h2>Generate Exam Timetable by Subject Pairs</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <form action="{% url 'create_subject_pair_timetable' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Timetable Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    <h5 class="mb-3">Select Subject Pairs</h5>
+                    <p class="text-muted mb-3">Pair subjects that should be scheduled on the same day:</p>
+                    
+                    <div id="subject-pairs">
+                        <div class="subject-pair mb-4 p-3 border rounded">
+                            <div class="row mb-2">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">First Subject (Morning)</label>
+                                    <select class="form-select first-subject" name="first_subjects[]" required>
+                                        <option value="">-- Select Morning Subject --</option>
+                                        {% for course in courses %}
+                                            <option value="{{ course.id }}">{{ course.code }} - {{ course.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Second Subject (Afternoon)</label>
+                                    <select class="form-select second-subject" name="second_subjects[]" required>
+                                        <option value="">-- Select Afternoon Subject --</option>
+                                        {% for course in courses %}
+                                            <option value="{{ course.id }}">{{ course.code }} - {{ course.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <button type="button" id="add-pair" class="btn btn-outline-success">
+                            <i class="fas fa-plus"></i> Add Another Pair
+                        </button>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Generate Timetable</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">How Subject Pairing Works</h5>
+            </div>
+            <div class="card-body">
+                <p>This generator lets you create a timetable by defining which subjects should be scheduled together:</p>
+                <ol>
+                    <li>The first subject in each pair will be scheduled in the morning (9:00 AM - 12:00 PM)</li>
+                    <li>The second subject will be scheduled in the afternoon (2:00 PM - 5:00 PM)</li>
+                    <li>Each pair will be assigned to consecutive dates in your date range</li>
+                </ol>
+                <p>After generation, you can adjust specific dates and times as needed.</p>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Make sure each subject appears in only one pair to avoid scheduling conflicts.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const subjectPairsContainer = document.getElementById('subject-pairs');
+        const addPairButton = document.getElementById('add-pair');
+        
+        // Track which subjects have been selected
+        let selectedSubjects = new Set();
+        
+        // Add new subject pair
+        addPairButton.addEventListener('click', function() {
+            const pairTemplate = subjectPairsContainer.children[0].cloneNode(true);
+            
+            // Clear selections in the new pair
+            pairTemplate.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+            
+            // Add delete button to new pairs
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'btn btn-sm btn-danger mt-2';
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i> Remove Pair';
+            deleteButton.addEventListener('click', function() {
+                pairTemplate.remove();
+                updateSelectOptions();
+            });
+            
+            pairTemplate.appendChild(deleteButton);
+            subjectPairsContainer.appendChild(pairTemplate);
+            
+            // Update available options
+            updateSelectOptions();
+        });
+        
+        // Prevent duplicate subject selection
+        subjectPairsContainer.addEventListener('change', function(e) {
+            if (e.target.classList.contains('first-subject') || e.target.classList.contains('second-subject')) {
+                updateSelectOptions();
+            }
+        });
+        
+        function updateSelectOptions() {
+            // Get all currently selected values
+            selectedSubjects.clear();
+            const allSelects = subjectPairsContainer.querySelectorAll('select');
+            
+            allSelects.forEach(select => {
+                if (select.value) {
+                    selectedSubjects.add(select.value);
+                }
+            });
+            
+            // Disable already selected options in all selects
+            allSelects.forEach(select => {
+                const currentValue = select.value;
+                Array.from(select.options).forEach(option => {
+                    const optionValue = option.value;
+                    if (optionValue && optionValue !== currentValue) {
+                        option.disabled = selectedSubjects.has(optionValue);
+                    } else {
+                        option.disabled = false;
+                    }
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %} 

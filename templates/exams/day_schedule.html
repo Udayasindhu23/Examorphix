@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load exam_tags %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2>
+                    <i class="fas fa-calendar-day me-2"></i>
+                    Exams on {{ date|date:"l, F j, Y" }}
+                </h2>
+                <p class="text-muted">
+                    <i class="fas fa-info-circle me-2"></i>
+                    {{ timetable.name }}
+                </p>
+            </div>
+            <div>
+                <a href="{% url 'view_timetable' timetable.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Timetable
+                </a>
+                <a href="{% url 'manual_scheduling' timetable.id %}" class="btn btn-primary">
+                    <i class="fas fa-edit me-2"></i>Edit Schedule
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        {% if exams %}
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        Scheduled Exams
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Time</th>
+                                <th>Subject</th>
+                                <th>Hall</th>
+                                <th>Department</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exam in exams %}
+                                <tr>
+                                    <td>
+                                        <i class="fas fa-clock me-2"></i>
+                                        {{ exam.start_time|format_time }} - {{ exam.end_time|format_time }}
+                                    </td>
+                                    <td>
+                                        <strong>{{ exam.course.code }}</strong> - {{ exam.course.name }}
+                                    </td>
+                                    <td>
+                                        <i class="fas fa-building me-2"></i>
+                                        {{ exam.hall.name }}
+                                    </td>
+                                    <td>
+                                        {{ exam.course.department }} 
+                                        <span class="badge bg-info">Semester {{ exam.course.semester }}</span>
+                                    </td>
+                                    <td>
+                                        {% with duration=exam.end_time|time_diff:exam.start_time %}
+                                            {{ duration }} hours
+                                        {% endwith %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                No exams scheduled for this date.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">Time Blocks</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    {% for hour in '8,9,10,11,12,13,14,15,16,17,18'|split:',' %}
+                        <div class="timeline-item">
+                            <div class="timeline-time">{{ hour }}:00</div>
+                            <div class="timeline-content">
+                                {% for exam in exams %}
+                                    {% with start_hour=exam.start_time|slice:":2"|add:0 end_hour=exam.end_time|slice:":2"|add:0 %}
+                                        {% if start_hour|add:0 <= hour|add:0 and end_hour|add:0 > hour|add:0 %}
+                                            <div class="timeline-event bg-primary text-white p-2 mb-2 rounded">
+                                                {{ exam.course.code }} ({{ exam.start_time|slice:":5" }} - {{ exam.end_time|slice:":5" }})
+                                                <br>
+                                                <small>{{ exam.hall.name }}</small>
+                                            </div>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+    .timeline-item {
+        display: flex;
+        margin-bottom: 15px;
+    }
+    .timeline-time {
+        width: 80px;
+        text-align: right;
+        padding-right: 15px;
+        font-weight: bold;
+    }
+    .timeline-content {
+        flex-grow: 1;
+        border-left: 2px solid #ccc;
+        padding-left: 15px;
+        min-height: 40px;
+    }
+    .timeline-event {
+        max-width: 300px;
+    }
+</style>
+{% endblock %} 

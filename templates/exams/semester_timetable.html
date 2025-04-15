@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load exam_tags %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2>{{ timetable.name }} - Semester Grid</h2>
+                    <p class="text-muted">
+                        {{ timetable.start_date|date:"F j, Y" }} - {{ timetable.end_date|date:"F j, Y" }}
+                    </p>
+                </div>
+                <div>
+                    <a href="{% url 'view_timetable' timetable.id %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Timetable
+                    </a>
+                    <a href="{% url 'export_grid_pdf' timetable.id %}" class="btn btn-danger">
+                        <i class="fas fa-file-pdf"></i> Export Grid PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Examination Schedule Grid -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Examination Schedule Grid</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr class="bg-light">
+                            <th style="width: 15%">Day/Time</th>
+                            {% for dept in departments %}
+                            <th>{{ dept }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for date, time_slots in exam_grid.items %}
+                            {% for time_slot, dept_exams in time_slots.items %}
+                                <tr {% if forloop.counter|divisibleby:2 %}class="bg-light-gray"{% endif %}>
+                                    <td class="font-weight-bold">
+                                        <div class="text-dark">{{ date|date:"D, M j" }}</div>
+                                        <small class="text-muted">({{ time_slot }})</small>
+                                    </td>
+                                    
+                                    {% for dept in departments %}
+                                        <td class="{% if not dept_exams|get_item:dept %}table-light{% endif %}">
+                                            {% with exam=dept_exams|get_item:dept %}
+                                                {% if exam %}
+                                                    <div class="exam-cell">
+                                                        <div class="course-code">{{ exam.course.code }}</div>
+                                                        <div class="course-name">{{ exam.course.name }}</div>
+                                                        <div class="badge bg-info">{{ exam.hall.name }}</div>
+                                                    </div>
+                                                {% else %}
+                                                    -
+                                                {% endif %}
+                                            {% endwith %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bg-light-gray {
+        background-color: #f8f9fa;
+    }
+    
+    .exam-cell {
+        padding: 8px 0;
+    }
+    
+    .course-code {
+        font-weight: bold;
+        color: #2c3e50;
+    }
+    
+    .course-name {
+        font-size: 0.9em;
+        color: #666;
+        margin: 4px 0;
+    }
+    
+    .table td {
+        vertical-align: middle;
+        padding: 12px;
+    }
+    
+    .badge {
+        font-weight: normal;
+    }
+</style>
+{% endblock %} 

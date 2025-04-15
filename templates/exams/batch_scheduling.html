@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Batch Scheduling - {{ timetable.name }}</h2>
+            <div>
+                <a href="{% url 'view_timetable' timetable.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Timetable
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i> This scheduling method has been deprecated. Please use the Subject Pair scheduling method instead.
+    <hr>
+    <a href="{% url 'subject_pair_scheduling' timetable.id %}" class="btn btn-primary">
+        <i class="fas fa-exchange-alt"></i> Go to Subject Pair Scheduling
+    </a>
+</div>
+{% endblock %} 

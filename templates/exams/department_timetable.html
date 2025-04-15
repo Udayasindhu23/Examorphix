@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load exam_tags %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Department-wise Exam Schedule - {{ timetable.name }}</h2>
+            <div>
+                <a href="{% url 'view_timetable' timetable.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Timetable
+                </a>
+                <a href="{% url 'export_timetable' timetable.id %}" class="btn btn-success">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </a>
+            </div>
+        </div>
+        <p class="text-muted">
+            {{ timetable.start_date|date:"F j, Y" }} - {{ timetable.end_date|date:"F j, Y" }}
+        </p>
+    </div>
+</div>
+
+<!-- Department Quick Links -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Departments</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    {% for department in departments %}
+                        <a href="#department-{{ department|slugify }}" class="btn btn-outline-primary">
+                            {{ department }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for department in departments %}
+    <div class="row mb-5" id="department-{{ department|slugify }}">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">{{ department }}</h4>
+                </div>
+                <div class="card-body">
+                    {% with dept_exams=department_data|get_item:department %}
+                        {% if dept_exams %}
+                            {% for date, exams in dept_exams.items %}
+                                <h5 class="date-header">{{ date|date:"l, F j, Y" }}</h5>
+                                <table class="table table-bordered table-hover mb-4">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Course</th>
+                                            <th>Hall</th>
+                                            <th>Semester</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for exam in exams %}
+                                            <tr>
+                                                <td width="20%">{{ exam.start_time|format_time }} - {{ exam.end_time|format_time }}</td>
+                                                <td width="40%">
+                                                    <strong>{{ exam.course.code }}</strong> - {{ exam.course.name }}
+                                                </td>
+                                                <td width="20%">{{ exam.hall.name }}</td>
+                                                <td width="20%">Semester {{ exam.course.semester }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-warning">
+                                No exams scheduled for {{ department }}.
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+{% endblock %} 

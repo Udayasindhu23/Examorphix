@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h2>Exam Schedule by Subject - {{ timetable.name }}</h2>
+            <div>
+                <a href="{% url 'view_timetable' timetable.id %}" class="btn btn-secondary">View by Date</a>
+                <a href="{% url 'home' %}" class="btn btn-outline-secondary">Back to List</a>
+                <a href="{% url 'export_timetable' timetable.id %}" class="btn btn-success">Export CSV</a>
+            </div>
+        </div>
+        <p class="text-muted">
+            {{ timetable.start_date|date:"F j, Y" }} - {{ timetable.end_date|date:"F j, Y" }}
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        {% if course_schedule %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Subject</th>
+                            <th>Exam Date</th>
+                            <th>Time</th>
+                            <th>Hall</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for course, exam in course_schedule.items %}
+                            <tr>
+                                <td>
+                                    <strong>{{ course.code }}</strong> - {{ course.name }}<br>
+                                    <span class="badge bg-secondary">{{ course.department }}</span>
+                                    <span class="badge bg-info">Semester {{ course.semester }}</span>
+                                </td>
+                                <td>{{ exam.date|date:"l, F j, Y" }}</td>
+                                <td>{{ exam.start_time }} - {{ exam.end_time }}</td>
+                                <td>{{ exam.hall.name }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                This timetable doesn't have any exams scheduled.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Calendar View</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr class="bg-light">
+                                <th>Date / Time</th>
+                                {% for date in all_dates %}
+                                    <th>{{ date|date:"D, M d" }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for start_time, end_time in time_slots %}
+                                <tr>
+                                    <td class="fw-bold">{{ start_time }} - {{ end_time }}</td>
+                                    {% for date in all_dates %}
+                                        <td>
+                                            {% for course, exam in course_schedule.items %}
+                                                {% if exam.date == date and exam.start_time == start_time %}
+                                                    <div class="p-1 mb-1 bg-info bg-opacity-25 rounded">
+                                                        <strong>{{ course.code }}</strong>
+                                                        <br>
+                                                        <small>{{ exam.hall.name }}</small>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

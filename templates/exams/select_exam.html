@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Select Exam{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Select Exam</h2>
+    <div class="row mt-4">
+        {% for exam in exams %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    {{ exam.course.code }} - {{ exam.course.name }}
+                </div>
+                <div class="card-body">
+                    <p><strong>Date:</strong> {{ exam.date }}</p>
+                    <p><strong>Time:</strong> {{ exam.start_time }} - {{ exam.end_time }}</p>
+                    <p><strong>Hall:</strong> {{ exam.hall.name }}</p>
+                    <div class="mt-3">
+                        <a href="{% url 'allocate_seats' exam.id %}" class="btn btn-primary btn-sm">Allocate Seats</a>
+                        <a href="{% url 'mark_attendance' exam.id %}" class="btn btn-info btn-sm">Mark Attendance</a>
+                        <a href="{% url 'seat_heatmap' exam.id %}" class="btn btn-warning btn-sm">Seat Heatmap</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No exams found. Please create a timetable first.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

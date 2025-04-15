@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Allocate Seats for {{ exam.course.code }} - {{ exam.course.name }}</h2>
+    <p class="text-muted">Exam Hall: {{ hall.name }} (Capacity: {{ hall.capacity }})</p>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Add Student</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'add_student_to_exam' exam.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="roll_number" class="form-label">Roll Number</label>
+                            <input type="text" class="form-control" id="roll_number" name="roll_number" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Student Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="department" class="form-label">Department</label>
+                            <select class="form-select" id="department" name="department" required>
+                                <option value="">Select Department</option>
+                                <option value="AIDS">Artificial Intelligence and Data Science (AIDS)</option>
+                                <option value="CSE">Computer Science and Engineering (CSE)</option>
+                                <option value="ECE">Electronics and Communication Engineering (ECE)</option>
+                                <option value="IT">Information Technology (IT)</option>
+                                <option value="MECH">Mechanical Engineering (MECH)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="semester" class="form-label">Semester</label>
+                            <select class="form-select" id="semester" name="semester" required>
+                                <option value="">Select Semester</option>
+                                <option value="1">1st Semester</option>
+                                <option value="2">2nd Semester</option>
+                                <option value="3">3rd Semester</option>
+                                <option value="4">4th Semester</option>
+                                <option value="5">5th Semester</option>
+                                <option value="6">6th Semester</option>
+                                <option value="7">7th Semester</option>
+                                <option value="8">8th Semester</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success">Add Student</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Bulk Import Students</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'import_students' exam.id %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Upload CSV File</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                            <small class="text-muted">CSV format: Roll Number, Name, Department</small>
+                        </div>
+                        <button type="submit" class="btn btn-info">Import Students</button>
+                        <a href="{% url 'download_template' %}" class="btn btn-outline-primary">Download Template</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Seat Allocation Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'allocate_seats' exam.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="social_distance" class="form-label">Social Distance (in seats)</label>
+                            <input type="number" class="form-control" id="social_distance" name="social_distance" 
+                                   value="1" min="1" max="3">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Allocate Seats</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Students to Allocate</h5>
+                    <div>
+                        <span class="badge bg-light text-primary me-2">Total: {{ students|length }}</span>
+                        {% if students %}
+                        <form method="post" action="{% url 'remove_all_students_from_exam' exam.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to remove all students from this exam?')">
+                                <i class="bi bi-trash"></i> Delete All
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-striped table-hover">
+                            <thead class="sticky-top bg-white">
+                                <tr>
+                                    <th>Roll Number</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td>{{ student.roll_number }}</td>
+                                    <td>{{ student.name }}</td>
+                                    <td>{{ student.department }}</td>
+                                    <td>
+                                        <form method="post" action="{% url 'remove_student_from_exam' exam.id student.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                        <a href="{% url 'edit_student_allocation' exam.id student.id %}" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">No students added yet</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add form validation
+    document.addEventListener('DOMContentLoaded', function() {
+        const forms = document.querySelectorAll('form');
+        forms.forEach(form => {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        });
+    });
+</script>
+{% endblock %} 

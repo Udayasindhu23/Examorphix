@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Optimized Routes for {{ exam.course.code }} - {{ exam.course.name }}</h2>
+    <p class="text-muted">Exam Hall: {{ exam.hall.name }} ({{ exam.hall.building }}, Floor {{ exam.hall.floor }})</p>
+    
+    <div class="row">
+        {% for student, route_info in routes %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ student.name }} ({{ student.roll_number }})</h5>
+                </div>
+                <div class="card-body">
+                    <div class="route-info mb-4">
+                        <h6 class="text-primary">
+                            <i class="bi bi-signpost-2"></i> Primary Route
+                            <span class="badge bg-info ms-2">
+                                Distance: {{ route_info.total_distance }}m
+                            </span>
+                        </h6>
+                        <div class="timeline">
+                            {% for step in route_info.primary_route %}
+                            <div class="timeline-item">
+                                <div class="timeline-badge bg-primary">{{ step.step }}</div>
+                                <div class="timeline-content">
+                                    <p class="mb-1"><strong>{{ step.instruction }}</strong></p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="bi bi-geo-alt"></i> {{ step.landmarks }}
+                                        {% if step.distance > 0 %}
+                                        <span class="ms-2">
+                                            <i class="bi bi-arrows-move"></i> {{ step.distance }}m
+                                        </span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="route-info">
+                        <h6 class="text-secondary">
+                            <i class="bi bi-signpost-split"></i> Alternative Route
+                        </h6>
+                        <div class="timeline">
+                            {% for step in route_info.alternative_route %}
+                            <div class="timeline-item">
+                                <div class="timeline-badge bg-secondary">{{ step.step }}</div>
+                                <div class="timeline-content">
+                                    <p class="mb-1"><strong>{{ step.instruction }}</strong></p>
+                                    <p class="text-muted small mb-0">
+                                        <i class="bi bi-geo-alt"></i> {{ step.landmarks }}
+                                        {% if step.distance > 0 %}
+                                        <span class="ms-2">
+                                            <i class="bi bi-arrows-move"></i> {{ step.distance }}m
+                                        </span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="accessibility-info mt-3 pt-3 border-top">
+                        <h6 class="text-muted">Accessibility Information</h6>
+                        <div class="d-flex gap-3">
+                            <span class="badge {% if route_info.accessibility.has_elevator %}bg-success{% else %}bg-secondary{% endif %}">
+                                <i class="bi bi-elevator"></i> Elevator
+                            </span>
+                            <span class="badge {% if route_info.accessibility.has_ramp %}bg-success{% else %}bg-secondary{% endif %}">
+                                <i class="bi bi-signpost"></i> Ramp Access
+                            </span>
+                            <span class="badge bg-info">
+                                <i class="bi bi-building"></i> Floor {{ route_info.accessibility.floor_level }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 20px;
+}
+
+.timeline-badge {
+    position: absolute;
+    left: 0;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 30px;
+    color: white;
+}
+
+.timeline-content {
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+</style>
+{% endblock %} 

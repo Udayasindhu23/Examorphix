@@ -1,0 +1,47 @@
+[
+    {
+        "model": "exams.department",
+        "pk": 1,
+        "fields": {
+            "name": "Computer Science and Engineering",
+            "code": "CSE",
+            "description": "Department of Computer Science and Engineering"
+        }
+    },
+    {
+        "model": "exams.department",
+        "pk": 2,
+        "fields": {
+            "name": "Artificial Intelligence and Data Science",
+            "code": "AIDS",
+            "description": "Department of AI and Data Science"
+        }
+    },
+    {
+        "model": "exams.department",
+        "pk": 3,
+        "fields": {
+            "name": "Electronics and Communication Engineering",
+            "code": "ECE",
+            "description": "Department of Electronics and Communication Engineering"
+        }
+    },
+    {
+        "model": "exams.department",
+        "pk": 4,
+        "fields": {
+            "name": "Information Technology",
+            "code": "IT",
+            "description": "Department of Information Technology"
+        }
+    },
+    {
+        "model": "exams.department",
+        "pk": 5,
+        "fields": {
+            "name": "Mechanical Engineering",
+            "code": "MECH",
+            "description": "Department of Mechanical Engineering"
+        }
+    }
+] 

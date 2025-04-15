@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Generate Exam Timetable by Subject Pairs</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <form method="post" id="pairSchedulingForm">
+                {% csrf_token %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="timetableName" class="form-label">Timetable Name</label>
+                            <input type="text" class="form-control" id="timetableName" name="timetable_name" value="{{ timetable.name }}" readonly>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="startDate" class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="startDate" name="start_date" value="{{ timetable.start_date|date:'Y-m-d' }}" required>
+            </div>
+        </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="endDate" class="form-label">End Date</label>
+                                    <input type="date" class="form-control" id="endDate" name="end_date" value="{{ timetable.end_date|date:'Y-m-d' }}" required>
+                                </div>
+    </div>
+</div>
+            </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Subject Selection Filters</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="yearFilter" class="form-label">Year</label>
+                                <select class="form-select" id="yearFilter" name="year">
+                                    <option value="">All Years</option>
+                                    <option value="1">First Year</option>
+                                    <option value="2">Second Year</option>
+                                    <option value="3">Third Year</option>
+                                    <option value="4">Fourth Year</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="departmentFilter" class="form-label">Department</label>
+                                <select class="form-select" id="departmentFilter" name="department">
+                                    <option value="">All Departments</option>
+                                    {% for dept in departments %}
+                                    <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.code }})</option>
+                            {% endfor %}
+                        </select>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Select Subject Pairs</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Pair subjects that should be scheduled on the same day:</p>
+                        
+                        <div id="subjectPairs">
+                            <div class="subject-pair mb-3">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label">First Subject (Morning)</label>
+                                        <select class="form-select morning-subject" name="morning_subjects[]">
+                                            <option value="">-- Select Morning Subject (Optional) --</option>
+                                            {% for subject in subjects %}
+                                            <option value="{{ subject.id }}" 
+                                                    data-year="{{ subject.year }}" 
+                                                    data-department="{{ subject.department.id }}"
+                                                    data-dept-code="{{ subject.department.code }}">
+                                                {{ subject.code }} - {{ subject.name }} 
+                                                ({{ subject.department.code }}, Year {{ subject.year }})
+                                            </option>
+                            {% endfor %}
+                                        </select>
+                                        <div class="mt-2">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Date</label>
+                                                    <input type="date" class="form-control morning-date" name="morning_dates[]" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Time</label>
+                                                    <select class="form-select morning-time" name="morning_times[]" required>
+                                                        <option value="09:00">9:00 AM - 12:00 PM</option>
+                                                        <option value="10:00">10:00 AM - 1:00 PM</option>
+                        </select>
+                    </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Room</label>
+                                                    <select class="form-select morning-room" name="morning_rooms[]">
+                                                        <option value="">-- Select Room (Optional) --</option>
+                                                        {% for room in classrooms %}
+                                                        <option value="{{ room.id }}">{{ room.name }} - {{ room.building }} Floor {{ room.floor }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+            </div>
+        </div>
+    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Second Subject (Afternoon)</label>
+                                        <select class="form-select afternoon-subject" name="afternoon_subjects[]">
+                                            <option value="">-- Select Afternoon Subject (Optional) --</option>
+                                            {% for subject in subjects %}
+                                            <option value="{{ subject.id }}" 
+                                                    data-year="{{ subject.year }}" 
+                                                    data-department="{{ subject.department.id }}"
+                                                    data-dept-code="{{ subject.department.code }}">
+                                                {{ subject.code }} - {{ subject.name }}
+                                                ({{ subject.department.code }}, Year {{ subject.year }})
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="mt-2">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Date</label>
+                                                    <input type="date" class="form-control afternoon-date" name="afternoon_dates[]" required>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Time</label>
+                                                    <select class="form-select afternoon-time" name="afternoon_times[]" required>
+                                                        <option value="14:00">2:00 PM - 5:00 PM</option>
+                                                        <option value="15:00">3:00 PM - 6:00 PM</option>
+                                                    </select>
+            </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Room</label>
+                                                    <select class="form-select afternoon-room" name="afternoon_rooms[]">
+                                                        <option value="">-- Select Room (Optional) --</option>
+                                                        {% for room in classrooms %}
+                                                        <option value="{{ room.id }}">{{ room.name }} - {{ room.building }} Floor {{ room.floor }}</option>
+                                                {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger mt-2 remove-pair" style="display: none;">
+                                    <i class="fas fa-trash"></i> Remove Pair
+                                </button>
+                            </div>
+                    </div>
+
+                        <button type="button" class="btn btn-outline-primary" id="addPairBtn">
+                            <i class="fas fa-plus"></i> Add Another Pair
+                        </button>
+                    </div>
+            </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-calendar-check me-2"></i>Generate Timetable
+                </button>
+            </form>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">How Subject Pairing Works</h5>
+            </div>
+            <div class="card-body">
+                    <p>This generator lets you create a timetable by defining which subjects should be scheduled together:</p>
+                    <ol>
+                        <li>The first subject in each pair will be scheduled in the morning (9:00 AM - 12:00 PM)</li>
+                        <li>The second subject will be scheduled in the afternoon (2:00 PM - 5:00 PM)</li>
+                        <li>Each pair will be assigned to consecutive dates in your date range</li>
+                    </ol>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Make sure each subject appears in only one pair to avoid scheduling conflicts.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    const yearFilter = document.getElementById('yearFilter');
+    const departmentFilter = document.getElementById('departmentFilter');
+    const addPairBtn = document.getElementById('addPairBtn');
+    const subjectPairs = document.getElementById('subjectPairs');
+    const pairTemplate = subjectPairs.querySelector('.subject-pair').cloneNode(true);
+    
+    // Initialize remove buttons for existing pairs
+    document.querySelectorAll('.subject-pair').forEach((pair, index) => {
+        if (index > 0) {
+            pair.querySelector('.remove-pair').style.display = 'block';
+        }
+    });
+
+    // Function to check if an option should be visible based on filters
+    function shouldShowOption(option, selectedYear, selectedDepartment) {
+        if (!option.value) return true; // Always show the placeholder option
+        
+        const yearMatch = !selectedYear || option.dataset.year === selectedYear;
+        const deptMatch = !selectedDepartment || option.dataset.department === selectedDepartment;
+        
+        return yearMatch && deptMatch;
+    }
+
+    // Filter subjects based on year and department
+    function filterSubjects() {
+        const selectedYear = yearFilter.value;
+        const selectedDepartment = departmentFilter.value;
+        
+        document.querySelectorAll('.morning-subject, .afternoon-subject').forEach(select => {
+            let hasVisibleOptions = false;
+            
+            select.querySelectorAll('option').forEach(option => {
+                if (shouldShowOption(option, selectedYear, selectedDepartment)) {
+                    option.style.display = '';
+                    if (option.value) hasVisibleOptions = true;
+                } else {
+                    option.style.display = 'none';
+                    if (option.selected) select.value = '';
+                }
+            });
+
+            if (!hasVisibleOptions) {
+                select.classList.add('no-options');
+                const noOptionsMsg = select.querySelector('option[disabled][data-no-options]');
+                if (!noOptionsMsg) {
+                    const msg = document.createElement('option');
+                    msg.textContent = 'No subjects available for selected filters';
+                    msg.disabled = true;
+                    msg.dataset.noOptions = 'true';
+                    select.appendChild(msg);
+                }
+            } else {
+                select.classList.remove('no-options');
+                const noOptionsMsg = select.querySelector('option[disabled][data-no-options]');
+                if (noOptionsMsg) noOptionsMsg.remove();
+            }
+        });
+    }
+
+    // Function to set min/max dates for date inputs
+    function setupDateConstraints(pairDiv) {
+        const morningDate = pairDiv.querySelector('.morning-date');
+        const afternoonDate = pairDiv.querySelector('.afternoon-date');
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+
+        // Update date constraints when start/end dates change
+        function updateDateConstraints() {
+            const min = startDate.value;
+            const max = endDate.value;
+            
+            morningDate.min = min;
+            morningDate.max = max;
+            afternoonDate.min = min;
+            afternoonDate.max = max;
+
+            // Set default value to start date if not set
+            if (!morningDate.value) morningDate.value = min;
+            if (!afternoonDate.value) afternoonDate.value = min;
+        }
+
+        // Update constraints when start/end dates change
+        startDate.addEventListener('change', updateDateConstraints);
+        endDate.addEventListener('change', updateDateConstraints);
+
+        // Initial setup
+        updateDateConstraints();
+    }
+
+    // Add new subject pair
+    function addSubjectPair() {
+        const newPair = pairTemplate.cloneNode(true);
+        
+        // Reset selections
+        newPair.querySelectorAll('select').forEach(select => {
+            if (select.classList.contains('morning-time')) {
+                select.value = '09:00';
+            } else if (select.classList.contains('afternoon-time')) {
+                select.value = '14:00';
+            } else {
+                select.value = '';
+            }
+        });
+        
+        // Show remove button
+        const removeBtn = newPair.querySelector('.remove-pair');
+        removeBtn.style.display = 'block';
+        removeBtn.addEventListener('click', () => {
+            newPair.remove();
+            updatePairValidation();
+        });
+        
+        subjectPairs.appendChild(newPair);
+        filterSubjects();
+        setupPairValidation(newPair);
+    }
+
+    // Setup validation for a subject pair
+    function setupPairValidation(pairDiv) {
+        const morningSelect = pairDiv.querySelector('.morning-subject');
+        const afternoonSelect = pairDiv.querySelector('.afternoon-subject');
+
+        function updateDisabledOptions() {
+            const morningValue = morningSelect.value;
+            const afternoonValue = afternoonSelect.value;
+
+            // Only disable options if both subjects are selected
+            if (morningValue && afternoonValue) {
+                // Reset all options
+                morningSelect.querySelectorAll('option').forEach(opt => {
+                    opt.disabled = opt.value && opt.value === afternoonValue;
+                });
+                afternoonSelect.querySelectorAll('option').forEach(opt => {
+                    opt.disabled = opt.value && opt.value === morningValue;
+                });
+            } else {
+                // Enable all options if either subject is empty
+                morningSelect.querySelectorAll('option').forEach(opt => {
+                    opt.disabled = false;
+                });
+                afternoonSelect.querySelectorAll('option').forEach(opt => {
+                    opt.disabled = false;
+                });
+            }
+        }
+
+        morningSelect.addEventListener('change', updateDisabledOptions);
+        afternoonSelect.addEventListener('change', updateDisabledOptions);
+
+        setupDateConstraints(pairDiv);
+    }
+
+    // Update validation for all pairs
+    function updatePairValidation() {
+        document.querySelectorAll('.subject-pair').forEach(setupPairValidation);
+    }
+
+    // Event listeners
+    yearFilter.addEventListener('change', filterSubjects);
+    departmentFilter.addEventListener('change', filterSubjects);
+    addPairBtn.addEventListener('click', addSubjectPair);
+
+    // Initialize validation for existing pairs
+    updatePairValidation();
+    
+    // Initialize filters
+    filterSubjects();
+    });
+</script>
+{% endblock %}
+{% endblock %} 

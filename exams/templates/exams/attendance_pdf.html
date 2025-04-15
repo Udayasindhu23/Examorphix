@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Attendance List - {{ exam.course.name }}</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 1cm;
+        }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+        }
+        .exam-info {
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        .exam-info h2 {
+            font-size: 14px;
+            margin: 0 0 5px 0;
+        }
+        .exam-info p {
+            margin: 2px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            font-size: 10px;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .status-text {
+            font-size: 9px;
+        }
+        .summary {
+            margin-top: 20px;
+            font-size: 10px;
+        }
+        .summary p {
+            margin: 2px 0;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Attendance List</h1>
+        </div>
+        
+        <div class="exam-info">
+            <h2>{{ exam.course.code }} - {{ exam.course.name }}</h2>
+            <p>Date: {{ exam.date|date:"d M Y" }}</p>
+            <p>Time: {{ exam.start_time|time:"g:i A" }} - {{ exam.end_time|time:"g:i A" }}</p>
+            <p>Hall: {{ exam.hall.name }}</p>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.roll_number }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.department }}</td>
+                    <td>
+                        {% for attendance in student.attendance_set.all %}
+                            {% if attendance.exam.id == exam.id %}
+                                <span class="status-text">
+                                    {% if attendance.present %}Present{% else %}Absent{% endif %}
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="summary">
+            <p><strong>Total Students:</strong> {{ students|length }}</p>
+            <p><strong>Present:</strong> {{ present_count }}</p>
+            <p><strong>Absent:</strong> {{ absent_count }}</p>
+        </div>
+        
+        <div class="footer">
+            <p>Generated on {{ now|date:"d M Y, g:i A" }}</p>
+        </div>
+    </div>
+</body>
+</html> 

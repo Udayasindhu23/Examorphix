@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2>Mark Attendance for {{ exam.course.code }} - {{ exam.course.name }}</h2>
+            <p class="text-muted">Date: {{ exam.date }} | Time: {{ exam.start_time }} - {{ exam.end_time }}</p>
+        </div>
+        <div>
+            <a href="{% url 'download_attendance' exam.id %}" class="btn btn-success">
+                <i class="fas fa-download"></i> Download PDF
+            </a>
+        </div>
+    </div>
+    
+    <form method="post">
+        {% csrf_token %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.roll_number }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.department }}</td>
+                        <td>
+                            <div class="status-box" data-student-id="{{ student.id }}">
+                                <input type="hidden" name="present_{{ student.id }}" 
+                                       value="{% if student.attendance_set.first.present %}on{% endif %}">
+                                <div class="status-badge {% if student.attendance_set.first.present %}present{% else %}absent{% endif %}"
+                                     onclick="toggleStatus(this)">
+                                    {% if student.attendance_set.first.present %}Present{% else %}Absent{% endif %}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <button type="submit" class="btn btn-primary mt-3">Save Attendance</button>
+    </form>
+</div>
+
+<style>
+    .status-badge {
+        display: inline-block;
+        padding: 0.5em 1em;
+        font-size: 0.9em;
+        min-width: 80px;
+        text-align: center;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .status-badge.present {
+        background-color: #198754;
+        color: white;
+    }
+    
+    .status-badge.absent {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .status-badge:hover {
+        opacity: 0.9;
+    }
+</style>
+
+<script>
+function toggleStatus(element) {
+    const statusBox = element.parentElement;
+    const hiddenInput = statusBox.querySelector('input[type="hidden"]');
+    const isPresent = element.classList.contains('present');
+    
+    if (isPresent) {
+        element.classList.remove('present');
+        element.classList.add('absent');
+        element.textContent = 'Absent';
+        hiddenInput.value = '';
+    } else {
+        element.classList.remove('absent');
+        element.classList.add('present');
+        element.textContent = 'Present';
+        hiddenInput.value = 'on';
+    }
+}
+</script>
+{% endblock %} 

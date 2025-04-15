@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-book me-2"></i>
+                    Manage Subjects
+                </h4>
+            </div>
+            <div class="card-body">
+                <!-- Add New Subject Form -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Add New Subject</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="add">
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="code" class="form-label">Subject Code</label>
+                                    <input type="text" class="form-control" id="code" name="code" required>
+                                    <div class="invalid-feedback">Please provide a subject code.</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">Subject Name</label>
+                                    <input type="text" class="form-control" id="name" name="name" required>
+                                    <div class="invalid-feedback">Please provide a subject name.</div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="year" class="form-label">Year</label>
+                                    <select class="form-select" id="year" name="year" required>
+                                        <option value="">Select Year</option>
+                                        <option value="1">First Year</option>
+                                        <option value="2">Second Year</option>
+                                        <option value="3">Third Year</option>
+                                        <option value="4">Fourth Year</option>
+                                    </select>
+                                    <div class="invalid-feedback">Please select a year.</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="department" class="form-label">Department</label>
+                                    <select class="form-select" id="department" name="department" required>
+                                        <option value="">Select Department</option>
+                                        {% for department in departments %}
+                                        <option value="{{ department.id }}">{{ department.name }} ({{ department.code }})</option>
+                                        {% endfor %}
+                                    </select>
+                                    <div class="invalid-feedback">Please select a department.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle me-1"></i>Add Subject
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Department Filter -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-4">
+                                <label for="filterDepartment" class="form-label">Filter by Department</label>
+                                <select class="form-select" id="filterDepartment">
+                                    <option value="">All Departments</option>
+                                    {% for department in departments %}
+                                    <option value="{{ department.id }}">{{ department.name }} ({{ department.code }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subjects List -->
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Existing Subjects</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                        <th>Year</th>
+                                        <th>Department</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for course in courses %}
+                                    <tr data-department="{{ course.department.id }}" class="subject-row">
+                                        <td>{{ course.code }}</td>
+                                        <td>{{ course.name }}</td>
+                                        <td>{{ course.get_year_display }}</td>
+                                        <td>{{ course.department.name }} ({{ course.department.code }})</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-sm btn-outline-primary edit-subject"
+                                                        data-subject-id="{{ course.id }}"
+                                                        data-code="{{ course.code }}"
+                                                        data-name="{{ course.name }}"
+                                                        data-year="{{ course.year }}"
+                                                        data-department="{{ course.department.id }}">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger delete-subject"
+                                                        data-subject-id="{{ course.id }}"
+                                                        data-code="{{ course.code }}">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr id="no-subjects-row">
+                                        <td colspan="5" class="text-center py-4">
+                                            <i class="fas fa-book text-muted mb-2" style="font-size: 48px;"></i>
+                                            <p class="mb-0">No subjects added yet.</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Subject Modal -->
+<div class="modal fade" id="editSubjectModal" tabindex="-1" aria-labelledby="editSubjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editSubjectModalLabel">
+                    <i class="fas fa-edit me-2"></i>Edit Subject
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editSubjectForm" method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="subject_id" id="editSubjectId">
+                    
+                    <div class="mb-3">
+                        <label for="editCode" class="form-label">Subject Code</label>
+                        <input type="text" class="form-control" id="editCode" name="code" required>
+                        <div class="invalid-feedback">Please provide a subject code.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="editName" class="form-label">Subject Name</label>
+                        <input type="text" class="form-control" id="editName" name="name" required>
+                        <div class="invalid-feedback">Please provide a subject name.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="editYear" class="form-label">Year</label>
+                        <select class="form-select" id="editYear" name="year" required>
+                            <option value="">Select Year</option>
+                            <option value="1">First Year</option>
+                            <option value="2">Second Year</option>
+                            <option value="3">Third Year</option>
+                            <option value="4">Fourth Year</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a year.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="editDepartment" class="form-label">Department</label>
+                        <select class="form-select" id="editDepartment" name="department" required>
+                            <option value="">Select Department</option>
+                            {% for department in departments %}
+                            <option value="{{ department.id }}">{{ department.name }} ({{ department.code }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="invalid-feedback">Please select a department.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="editSubjectForm" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+
+    // Handle department filter
+    document.getElementById('filterDepartment').addEventListener('change', function() {
+        const selectedDepartment = this.value;
+        const subjectRows = document.querySelectorAll('.subject-row');
+        const noSubjectsRow = document.getElementById('no-subjects-row');
+        let visibleRows = 0;
+
+        subjectRows.forEach(row => {
+            if (!selectedDepartment || row.dataset.department === selectedDepartment) {
+                row.style.display = '';
+                visibleRows++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Show/hide no subjects message
+        if (noSubjectsRow) {
+            if (visibleRows === 0) {
+                noSubjectsRow.style.display = '';
+                noSubjectsRow.querySelector('p').textContent = selectedDepartment ? 
+                    'No subjects found for the selected department.' : 
+                    'No subjects added yet.';
+            } else {
+                noSubjectsRow.style.display = 'none';
+            }
+        }
+    });
+
+    // Handle edit button clicks
+    document.querySelectorAll('.edit-subject').forEach(button => {
+        button.addEventListener('click', function() {
+            const subjectId = this.dataset.subjectId;
+            const subjectCode = this.dataset.code;
+            const subjectName = this.dataset.name;
+            const subjectYear = this.dataset.year;
+            const subjectDept = this.dataset.department;
+
+            document.getElementById('editSubjectId').value = subjectId;
+            document.getElementById('editCode').value = subjectCode;
+            document.getElementById('editName').value = subjectName;
+            document.getElementById('editYear').value = subjectYear;
+            document.getElementById('editDepartment').value = subjectDept;
+
+            const editModal = new bootstrap.Modal(document.getElementById('editSubjectModal'));
+            editModal.show();
+        });
+    });
+
+    // Handle delete button clicks
+    document.querySelectorAll('.delete-subject').forEach(button => {
+        button.addEventListener('click', function() {
+            const subjectId = this.dataset.subjectId;
+            const subjectCode = this.dataset.code;
+            
+            if (confirm(`Are you sure you want to delete subject ${subjectCode}?`)) {
+                const form = document.createElement('form');
+                form.method = 'post';
+                form.style.display = 'none';
+
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = '{{ csrf_token }}';
+                form.appendChild(csrfInput);
+
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'delete';
+                form.appendChild(actionInput);
+
+                const subjectIdInput = document.createElement('input');
+                subjectIdInput.type = 'hidden';
+                subjectIdInput.name = 'subject_id';
+                subjectIdInput.value = subjectId;
+                form.appendChild(subjectIdInput);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Select Timetable{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Select Timetable</h2>
+    <div class="row mt-4">
+        {% for timetable in timetables %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    {{ timetable.name }}
+                </div>
+                <div class="card-body">
+                    <p><strong>Start Date:</strong> {{ timetable.start_date }}</p>
+                    <p><strong>End Date:</strong> {{ timetable.end_date }}</p>
+                    <div class="mt-3">
+                        <a href="{% url 'assign_invigilators' timetable.id %}" class="btn btn-primary btn-sm">Assign Invigilators</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                No timetables found. Please create a timetable first.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

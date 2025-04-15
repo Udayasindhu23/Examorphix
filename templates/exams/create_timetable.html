@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-calendar-plus me-2"></i>
+                    Create New Timetable
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Timetable Name -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Timetable Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                        <div class="invalid-feedback">Please provide a timetable name.</div>
+                    </div>
+
+                    <!-- Year Selection -->
+                    <div class="mb-3">
+                        <label for="year" class="form-label">Select Year</label>
+                        <select class="form-select" id="year" name="year" required>
+                            <option value="">Select Year</option>
+                            <option value="1">First Year</option>
+                            <option value="2">Second Year</option>
+                            <option value="3">Third Year</option>
+                            <option value="4">Fourth Year</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a year.</div>
+                    </div>
+
+                    <!-- Department Selection -->
+                    <div class="mb-3">
+                        <label class="form-label">Select Departments</label>
+                        <div class="row">
+                            {% for department in departments %}
+                            <div class="col-md-6 mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="department_ids" 
+                                           value="{{ department.id }}" id="dept{{ department.id }}">
+                                    <label class="form-check-label" for="dept{{ department.id }}">
+                                        {{ department.name }} ({{ department.code }})
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="invalid-feedback">Please select at least one department.</div>
+                    </div>
+
+                    <!-- Subject Selection -->
+                    <div class="mb-3">
+                        <label class="form-label">Select Subjects</label>
+                        <div class="row" id="subjects-container">
+                            <!-- First Year Subjects -->
+                            <div class="col-12 mb-3">
+                                <h5 class="text-primary">First Year Subjects</h5>
+                                <div class="row">
+                                    {% for course in courses %}
+                                        {% if course.year == '1' %}
+                                        <div class="col-md-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="course_ids" 
+                                                       value="{{ course.id }}" id="course{{ course.id }}"
+                                                       data-department="{{ course.department.id }}"
+                                                       data-year="{{ course.year }}">
+                                                <label class="form-check-label" for="course{{ course.id }}">
+                                                    {{ course.code }} - {{ course.name }}
+                                                    <small class="text-muted">({{ course.department.code }})</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Second Year Subjects -->
+                            <div class="col-12 mb-3">
+                                <h5 class="text-primary">Second Year Subjects</h5>
+                                <div class="row">
+                                    {% for course in courses %}
+                                        {% if course.year == '2' %}
+                                        <div class="col-md-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="course_ids" 
+                                                       value="{{ course.id }}" id="course{{ course.id }}"
+                                                       data-department="{{ course.department.id }}"
+                                                       data-year="{{ course.year }}">
+                                                <label class="form-check-label" for="course{{ course.id }}">
+                                                    {{ course.code }} - {{ course.name }}
+                                                    <small class="text-muted">({{ course.department.code }})</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Third Year Subjects -->
+                            <div class="col-12 mb-3">
+                                <h5 class="text-primary">Third Year Subjects</h5>
+                                <div class="row">
+                                    {% for course in courses %}
+                                        {% if course.year == '3' %}
+                                        <div class="col-md-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="course_ids" 
+                                                       value="{{ course.id }}" id="course{{ course.id }}"
+                                                       data-department="{{ course.department.id }}"
+                                                       data-year="{{ course.year }}">
+                                                <label class="form-check-label" for="course{{ course.id }}">
+                                                    {{ course.code }} - {{ course.name }}
+                                                    <small class="text-muted">({{ course.department.code }})</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Fourth Year Subjects -->
+                            <div class="col-12 mb-3">
+                                <h5 class="text-primary">Fourth Year Subjects</h5>
+                                <div class="row">
+                                    {% for course in courses %}
+                                        {% if course.year == '4' %}
+                                        <div class="col-md-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="course_ids" 
+                                                       value="{{ course.id }}" id="course{{ course.id }}"
+                                                       data-department="{{ course.department.id }}"
+                                                       data-year="{{ course.year }}">
+                                                <label class="form-check-label" for="course{{ course.id }}">
+                                                    {{ course.code }} - {{ course.name }}
+                                                    <small class="text-muted">({{ course.department.code }})</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="invalid-feedback">Please select at least one subject.</div>
+                    </div>
+
+                    <!-- Date Range -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                            <div class="invalid-feedback">Please select a start date.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                            <div class="invalid-feedback">Please select an end date.</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Create Timetable
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('start_date').min = today;
+    document.getElementById('end_date').min = today;
+
+    // Update end date minimum based on start date
+    document.getElementById('start_date').addEventListener('change', function() {
+        document.getElementById('end_date').min = this.value;
+        if (document.getElementById('end_date').value < this.value) {
+            document.getElementById('end_date').value = this.value;
+        }
+    });
+
+    // Filter subjects based on selected departments and year
+    const departmentCheckboxes = document.querySelectorAll('input[name="department_ids"]');
+    const courseCheckboxes = document.querySelectorAll('input[name="course_ids"]');
+    const yearSelect = document.getElementById('year');
+    
+    function updateSubjectVisibility() {
+        const selectedYear = yearSelect.value;
+        const selectedDepartments = Array.from(departmentCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        // Hide/show year sections based on selection
+        document.querySelectorAll('#subjects-container > .col-12').forEach(section => {
+            const yearTitle = section.querySelector('h5').textContent;
+            const yearNumber = yearTitle.includes('First') ? '1' :
+                             yearTitle.includes('Second') ? '2' :
+                             yearTitle.includes('Third') ? '3' : '4';
+            
+            if (selectedYear && yearNumber !== selectedYear) {
+                section.style.display = 'none';
+                // Uncheck all subjects in hidden sections
+                section.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            } else {
+                section.style.display = 'block';
+            }
+        });
+
+        // Filter subjects within visible sections by department
+        courseCheckboxes.forEach(cb => {
+            const courseDept = cb.dataset.department;
+            const courseRow = cb.closest('.col-md-6');
+            
+            if (selectedDepartments.length === 0 || selectedDepartments.includes(courseDept)) {
+                courseRow.style.display = 'block';
+            } else {
+                courseRow.style.display = 'none';
+                cb.checked = false;
+            }
+        });
+    }
+
+    // Add event listeners
+    departmentCheckboxes.forEach(cb => {
+        cb.addEventListener('change', updateSubjectVisibility);
+    });
+    
+    yearSelect.addEventListener('change', updateSubjectVisibility);
+
+    // Form validation
+    (function() {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}
+{% endblock %} 

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - OptiMath{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4">Dashboard</h1>
+            <p class="lead">Welcome to OptiMath - Your Exam Timetable Management System</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Quick Stats -->
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-alt fa-3x mb-3 text-primary"></i>
+                    <h5 class="card-title">Total Timetables</h5>
+                    <p class="card-text display-6">{{ total_timetables }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-book fa-3x mb-3 text-success"></i>
+                    <h5 class="card-title">Total Exams</h5>
+                    <p class="card-text display-6">{{ total_exams }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-graduation-cap fa-3x mb-3 text-info"></i>
+                    <h5 class="card-title">Total Courses</h5>
+                    <p class="card-text display-6">{{ total_courses }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-building fa-3x mb-3 text-warning"></i>
+                    <h5 class="card-title">Total Halls</h5>
+                    <p class="card-text display-6">{{ total_halls }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Timetables -->
+    <div class="row mt-5">
+        <div class="col">
+            <h2 class="mb-4">Recent Timetables</h2>
+            {% if timetables %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Year</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for timetable in timetables %}
+                        <tr>
+                            <td>{{ timetable.name }}</td>
+                            <td>{{ timetable.year }}</td>
+                            <td>{{ timetable.start_date }}</td>
+                            <td>{{ timetable.end_date }}</td>
+                            <td>
+                                <a href="{% url 'view_timetable' timetable.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No timetables have been created yet.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

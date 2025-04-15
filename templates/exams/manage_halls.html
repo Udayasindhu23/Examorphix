@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Exam Halls{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Manage Exam Halls</h2>
+    
+    <!-- Add/Edit Hall Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            {% if editing_hall %}Edit Hall{% else %}Add New Hall{% endif %}
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="{% if editing_hall %}edit{% else %}add{% endif %}">
+                {% if editing_hall %}
+                    <input type="hidden" name="hall_id" value="{{ editing_hall.id }}">
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label for="name" class="form-label">Hall Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required 
+                           value="{{ editing_hall.name|default:'' }}" placeholder="Enter hall name">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="capacity" class="form-label">Capacity</label>
+                    <input type="number" class="form-control" id="capacity" name="capacity" required 
+                           value="{{ editing_hall.capacity|default:'' }}" min="1" placeholder="Enter capacity">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="building" class="form-label">Building</label>
+                    <input type="text" class="form-control" id="building" name="building" required 
+                           value="{{ editing_hall.building|default:'Main Building' }}" placeholder="Enter building name">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="floor" class="form-label">Floor</label>
+                    <input type="text" class="form-control" id="floor" name="floor" required 
+                           value="{{ editing_hall.floor|default:'Ground Floor' }}" placeholder="Enter floor">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="coordinates" class="form-label">Coordinates (JSON)</label>
+                    <input type="text" class="form-control" id="coordinates" name="coordinates" 
+                           value="{{ editing_hall.coordinates|default:'{"x": 0, "y": 0}' }}" placeholder='{"x": 0, "y": 0}'>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    {% if editing_hall %}Update Hall{% else %}Add Hall{% endif %}
+                </button>
+                {% if editing_hall %}
+                    <a href="{% url 'manage_halls' %}" class="btn btn-secondary">Cancel</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+    
+    <!-- Halls List -->
+    <div class="card">
+        <div class="card-header">
+            Exam Halls
+        </div>
+        <div class="card-body">
+            {% if halls %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Hall Name</th>
+                                <th>Capacity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hall in halls %}
+                                <tr>
+                                    <td>{{ hall.name }}</td>
+                                    <td>{{ hall.capacity }}</td>
+                                    <td>
+                                        <a href="{% url 'manage_halls' %}?edit={{ hall.id }}" 
+                                           class="btn btn-sm btn-primary">Edit</a>
+                                        <form method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="delete">
+                                            <input type="hidden" name="hall_id" value="{{ hall.id }}">
+                                            <button type="submit" class="btn btn-sm btn-danger" 
+                                                    onclick="return confirm('Are you sure you want to delete this hall?')">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No exam halls found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Seat Heatmap - {{ exam.course.name }}</title>
+    <style>
+        @page {
+            size: a4 landscape;
+            margin: 1cm;
+        }
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+        }
+        .exam-info {
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        .exam-info h2 {
+            font-size: 14px;
+            margin: 0 0 5px 0;
+        }
+        .exam-info p {
+            margin: 2px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 10px;
+        }
+        td {
+            border: 1px solid #000;
+            width: 60px;
+            height: 60px;
+            text-align: center;
+            position: relative;
+            padding: 0;
+            vertical-align: middle;
+            background-clip: padding-box;
+        }
+        .seat-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .roll-number {
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            width: 90%;
+        }
+        .seat-number {
+            font-size: 8px;
+            color: #666;
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            right: 0;
+            text-align: center;
+        }
+        .note {
+            font-size: 10px;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        /* Add spacing between every 2 columns */
+        td:nth-child(2n) {
+            border-right: 8px solid white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Seat Allocation Map</h1>
+        </div>
+        
+        <div class="exam-info">
+            <h2>{{ exam.course.name }}</h2>
+            <p>Exam Hall: {{ exam.hall.name }}</p>
+            <p>Date: {{ exam.date|date:"d M Y" }}</p>
+            <p>Time: {{ exam.start_time|time:"g:i A" }} - {{ exam.end_time|time:"g:i A" }}</p>
+        </div>
+        
+        <table>
+            {% for row in heatmap %}
+            <tr>
+                {% for col in row %}
+                {% with row_num=forloop.parentloop.counter0 col_num=forloop.counter0 %}
+                <td>
+                    <div class="seat-content">
+                        {% for allocation in allocations %}
+                        {% if allocation.row == row_num and allocation.column == col_num %}
+                        <div class="roll-number">{{ allocation.student.roll_number }}</div>
+                        {% endif %}
+                        {% endfor %}
+                        <div class="seat-number">
+                            {{ row_num|add:1 }}-{{ col_num|add:1 }}
+                        </div>
+                    </div>
+                </td>
+                {% endwith %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+        
+        <div class="note">
+            Note: Each box shows the seat number and assigned student's roll number (if allocated).
+        </div>
+    </div>
+</body>
+</html> 
